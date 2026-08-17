@@ -1,0 +1,780 @@
+\<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Talk to a Nurse | Mom's Haven</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <header>
+
+        <nav>
+
+            <a href="index.html" class="logo">
+
+                <img
+                    src="icon_project.jpg"
+                    alt="Mom's Haven logo"
+                >
+
+                <span>Mom's Haven</span>
+
+            </a>
+
+
+            <div class="nav-links">
+
+                <a href="index.html">Home</a>
+
+                <a href="about.html">About</a>
+
+                <a
+                    href="talk-to-a-nurse.html"
+                    class="active"
+                >
+                    Talk to a Nurse
+                </a>
+
+                <a href="emergency.html">
+                    Emergency Help
+                </a>
+
+                <a href="community.html">
+                    Community
+                </a>
+
+                <a href="faq.html">
+                    FAQ
+                </a>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main>
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <section class="page-header">
+
+            <h1>Talk to a Nurse</h1>
+
+            <p>
+                Tell us what is happening and we will help you
+                find the appropriate support pathway.
+            </p>
+
+        </section>
+
+
+        <!-- =================================================
+             SITUATION FORM
+        ================================================== -->
+
+        <section
+            class="situation-section"
+            id="situation-section"
+        >
+
+            <div class="form-container">
+
+                <h2>
+                    What is happening?
+                </h2>
+
+                <p class="form-description">
+
+                    Tell us what you are experiencing or what you
+                    are worried about. Describe the situation in
+                    your own words.
+
+                </p>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label for="situation">
+                        What is happening?
+                    </label>
+
+                    <textarea
+                        id="situation"
+                        name="situation"
+                        rows="8"
+                        placeholder="Describe what you or your baby is experiencing. For example: 'My baby has been crying for two hours and will not settle' or 'I have a painful lump in my breast' or 'I have been feeling low and cannot stop crying'..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- =================================================
+                     PHOTO UPLOAD
+                ================================================== -->
+
+                <div class="photo-section">
+
+                    <h3>
+                        UPLOAD A PHOTO
+                        <span>(OPTIONAL)</span>
+                    </h3>
+
+                    <p class="photo-description">
+
+                        A photo of a rash, wound, discharge, or
+                        anything visible can help the nurse advise
+                        you faster.
+
+                    </p>
+
+
+                    <!-- Hidden file input -->
+
+                    <input
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        accept=".jpg,.jpeg,.png,.heic"
+                    >
+
+
+                    <!-- Clickable upload box -->
+
+                    <label
+                        for="photo"
+                        class="photo-upload-box"
+                    >
+
+                        <span class="camera-icon">
+                            <img
+                                src="camera.png"
+                                alt="Upload photo"
+                            >
+                        </span>
+
+                        <span class="upload-main-text">
+                            Tap to upload a photo
+                        </span>
+
+                        <span class="upload-file-types">
+                            JPG, PNG, HEIC up to 10MB
+                        </span>
+
+                    </label>
+
+
+                    <!-- Selected file name -->
+
+                    <p
+                        id="file-name"
+                        class="file-name"
+                    ></p>
+
+                </div>
+
+
+                <!-- =================================================
+                     PHOTO NOTICE
+                ================================================== -->
+
+                <div class="photo-notice">
+
+                    <p>
+
+                        A photo can provide additional context
+                        but does not replace an in-person
+                        medical assessment.
+
+                    </p>
+
+                </div>
+
+
+                <!-- =================================================
+                     CONTINUE
+                ================================================== -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="btn primary-btn"
+                        id="continue-button"
+                    >
+                        Continue
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             NURSE RESULTS
+        ================================================== -->
+
+        <section
+            class="nurse-results"
+            id="nurse-results"
+            style="display: none;"
+        >
+
+            <div class="nurse-results-container">
+
+
+                <h2>
+                    Available Nurse
+                </h2>
+
+
+                <p class="nurse-results-intro">
+
+                    Based on your request, the following nurse
+                    is available to assist you.
+
+                </p>
+
+
+                <!-- =================================================
+                     NURSE PROFILE
+                ================================================== -->
+
+                <div class="nurse-profile">
+
+
+                    <div class="nurse-photo">
+
+                        <img
+                            src="nurse.jpg"
+                            alt="Nurse Thandi Mokoena"
+                        >
+
+                    </div>
+
+
+                    <div class="nurse-details">
+
+                        <h3>
+                            Nurse Thandi Mokoena
+                        </h3>
+
+                        <p class="nurse-role">
+                            Registered Nurse
+                        </p>
+
+                        <p class="nurse-speciality">
+                            Maternal and Child Health
+                        </p>
+
+                        <p class="nurse-experience">
+                            8 years of experience
+                        </p>
+
+                        <p class="nurse-location">
+                            South Africa
+                        </p>
+
+                        <p class="nurse-status">
+                            ● Available now
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     COMMUNICATION OPTIONS
+                ================================================== -->
+
+                <div
+                    class="communication-section"
+                    id="communication-options"
+                >
+
+                    <h3>
+                        How would you like to communicate?
+                    </h3>
+
+                    <p>
+                        Choose a communication method below.
+                    </p>
+
+
+                    <div class="communication-buttons">
+
+
+                        <!-- CHAT -->
+
+                        <button
+                            type="button"
+                            class="communication-btn"
+                            id="chat-button"
+                        >
+
+                            <span class="communication-icon">
+                                <img
+                                    src="communication_icon.jpg"
+                                    alt="Chat"
+                                >
+                            </span>
+
+                            <span>
+                                Chat
+                            </span>
+
+                        </button>
+
+
+                        <!-- VOICE -->
+
+                        <button
+                            type="button"
+                            class="communication-btn"
+                            id="voice-button"
+                        >
+
+                            <span class="call-icon">
+                                <img
+                                    src="phone_icon.jpg"
+                                    alt="Voice Call"
+                                >
+                            </span>
+
+                            <span>
+                                Voice Call
+                            </span>
+
+                        </button>
+
+
+                        <!-- VIDEO -->
+
+                        <button
+                            type="button"
+                            class="communication-btn"
+                            id="video-button"
+                        >
+
+                            <span class="video-icon">
+                                <img
+                                    src="video_call_icon.png"
+                                    alt="Video Call"
+                                >
+                            </span>
+
+                            <span>
+                                Video Call
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     CHAT INTERFACE
+                ================================================== -->
+
+                <div
+                    class="communication-box"
+                    id="chat-box"
+                    style="display: none;"
+                >
+
+                    <button
+                        type="button"
+                        class="back-option-btn"
+                        id="back-from-chat"
+                    >
+                        ← Choose another option
+                    </button>
+
+
+                    <div class="communication-header">
+
+<div class="interface-icon">
+    <img src="communication_icon.jpg" alt="Chat">
+</div>
+
+                        <div>
+
+                            <h3>
+                                Chat with Nurse Thandi
+                            </h3>
+
+                            <p>
+                                Nurse Thandi Mokoena is available
+                                to assist you.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="chat-messages"
+                        class="chat-messages"
+                    >
+
+                        <div class="chat-message nurse-message">
+
+                            <strong>
+                                Nurse Thandi:
+                            </strong>
+
+                            <p>
+
+                                Hello. I am available to assist you.
+                                Please tell me more about your concern.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="chat-input-area">
+
+                        <input
+                            type="text"
+                            id="message-input"
+                            class="message-input"
+                            placeholder="Type your message..."
+                        >
+
+                        <button
+                            type="button"
+                            class="btn primary-btn"
+                            id="send-message"
+                        >
+                            Send
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     VOICE CALL INTERFACE
+                ================================================== -->
+
+                <div
+                    class="communication-box"
+                    id="voice-box"
+                    style="display: none;"
+                >
+
+                    <button
+                        type="button"
+                        class="back-option-btn"
+                        id="back-from-voice"
+                    >
+                        ← Choose another option
+                    </button>
+
+
+                    <div class="call-interface">
+
+<div class="large-call-icon">
+    <img src="phone_icon.jpg" alt="Voice Call">
+</div>
+
+                        <h3>
+                            Voice Call
+                        </h3>
+
+                        <h4>
+                            Nurse Thandi Mokoena
+                        </h4>
+
+                        <p>
+                            Registered Nurse • Maternal and Child Health
+                        </p>
+
+                        <p class="call-status">
+                            ● Nurse is ready for a voice call.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="btn primary-btn call-action-btn"
+                            id="start-voice-call"
+                        >
+                            Start Voice Call
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="end-call-btn"
+                            id="end-voice-call"
+                            style="display: none;"
+                        >
+                            End Call
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     VIDEO CALL INTERFACE
+                ================================================== -->
+
+                <div
+                    class="communication-box"
+                    id="video-box"
+                    style="display: none;"
+                >
+
+                    <button
+                        type="button"
+                        class="back-option-btn"
+                        id="back-from-video"
+                    >
+                        ← Choose another option
+                    </button>
+
+
+                    <div class="video-interface">
+
+                        <h3>
+                            Video Call
+                        </h3>
+
+                        <p>
+                            You are connected to Nurse Thandi Mokoena.
+                        </p>
+
+
+                        <div class="video-placeholder">
+
+                            <img
+                                src="nurse.jpg"
+                                alt="Nurse Thandi Mokoena"
+                            >
+
+                            <div class="video-overlay">
+                                Nurse Thandi Mokoena
+                            </div>
+
+                        </div>
+
+
+                        <p class="call-status">
+                            ● Nurse is ready for a video call.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="btn primary-btn call-action-btn"
+                            id="start-video-call"
+                        >
+                            Start Video Call
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="end-call-btn"
+                            id="end-video-call"
+                            style="display: none;"
+                        >
+                            End Video Call
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     DISCLAIMER
+                ================================================== -->
+
+                <div class="nurse-disclaimer">
+
+                    <p>
+
+                        This is a student-developed prototype.
+                        The nurse profile shown is fictional and
+                        demonstrates how the service could work.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+        <div class="footer-container">
+
+
+            <!-- BRANDING -->
+
+            <div class="footer-branding">
+
+                <h2>
+                    Mom's Haven
+                </h2>
+
+                <p>
+
+                    A safe, warm space for new mothers to find
+                    information, community, and 24/7 nurse support.
+
+                </p>
+
+            </div>
+
+
+            <!-- EXPLORE -->
+
+            <div class="footer-section explore">
+
+                <h3>
+                    EXPLORE
+                </h3>
+
+                <ul>
+
+                    <li>
+                        <a href="about.html">
+                            About Us
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="faq.html">
+                            FAQ
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="community.html">
+                            Community
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="talk-to-a-nurse.html">
+                            Talk to a Nurse
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="emergency.html">
+                            Emergency Help
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- EMERGENCY -->
+
+            <div class="footer-section emergency-lines">
+
+                <h3>
+                    EMERGENCY LINES
+                </h3>
+
+                <ul>
+
+                    <li>
+                        Emergency:
+                        <a href="tel:112">
+                            112
+                        </a>
+                    </li>
+
+                    <li>
+                        SADAG:
+                        <a href="tel:0800456789">
+                            0800 456 789
+                        </a>
+                    </li>
+
+                    <li>
+                        LifeLine:
+                        <a href="tel:0861322322">
+                            0861 322 322
+                        </a>
+                    </li>
+
+                    <li>
+                        Childline:
+                        <a href="tel:116">
+                            116
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+
+                © 2026 Mom's Haven.
+                This service provides guidance only and does not
+                replace emergency medical care.
+
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+
+</html>
