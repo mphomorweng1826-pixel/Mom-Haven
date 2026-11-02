@@ -1,5 +1,4 @@
 
-const crypto = require('crypto');
 const express = require('express');
 const helmet = require('helmet');
 const session = require('express-session');
@@ -9,14 +8,14 @@ const path = require('path');
 
 require('dotenv').config();
 
-const { query } = require('./db');
+const { query, pool } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // =====================================================
-// CHECK CONFIGURATION
+// CONFIGURATION
 // =====================================================
 
 if (!process.env.SESSION_SECRET) {
@@ -28,10 +27,6 @@ if (isProduction && !process.env.FRONTEND_URL) {
     console.error('Error: FRONTEND_URL is missing.');
     process.exit(1);
 }
-
-// =====================================================
-// PROXY CONFIGURATION
-// =====================================================
 
 if (isProduction) {
     app.set('trust proxy', 1);
@@ -53,14 +48,8 @@ app.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader(
-            'Access-Control-Allow-Headers',
-            'Content-Type'
-        );
-        res.setHeader(
-            'Access-Control-Allow-Methods',
-            'GET, POST, OPTIONS'
-        );
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     }
 
     if (req.method === 'OPTIONS') {
@@ -85,7 +74,14 @@ app.use(express.urlencoded({ extended: true }));
 // SESSION CONFIGURATION
 // =====================================================
 
+const PgSession = require('connect-pg-simple')(session);
+
 app.use(session({
+    store: new PgSession({
+        pool: pool,
+        tableName: 'user_sessions',
+        createTableIfMissing: true
+    }),
     name: 'momsHaven.sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -98,9 +94,17 @@ app.use(session({
     }
 }));
 
-// IMPORTANT:
-// The default MemoryStore is suitable only for local testing.
-// Persistent session storage must be configured before deployment.
+// =====================================================
+// SECURITY QUESTIONS
+// =====================================================
+
+const allowedSecurityQuestions = [
+    'What was the name of your first school?',
+    'What is the name of your childhood best friend?',
+    'What was the name of your first pet?',
+    'In what city were you born?',
+    'What is your favourite childhood memory?'
+];
 
 // =====================================================
 // RATE LIMITERS
@@ -117,25 +121,36 @@ const loginLimiter = rateLimit({
     }
 });
 
-const forgotPasswordLimiter = rateLimit({
+const registrationLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 5,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: {
         success: false,
-        message: 'Too many password reset requests. Please try again later.'
+        message: 'Too many registration attempts. Please try again later.'
     }
 });
 
-const resetPasswordLimiter = rateLimit({
+const recoveryQuestionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 5,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: {
         success: false,
-        message: 'Too many password reset attempts. Please try again later.'
+        message: 'Too many recovery attempts. Please try again later.'
+    }
+});
+
+const passwordRecoveryLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many password recovery attempts. Please try again later.'
     }
 });
 
@@ -177,13 +192,21 @@ app.get('/api/status', (req, res) => {
 // USER REGISTRATION
 // =====================================================
 
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', registrationLimiter, async (req, res) => {
     try {
         const fullName = String(req.body.fullName || '').trim();
         const email = String(req.body.email || '').trim().toLowerCase();
         const password = req.body.password;
+        const securityQuestion = req.body.securityQuestion;
+        const securityAnswer = req.body.securityAnswer;
 
-        if (!fullName || !email || typeof password !== 'string') {
+        if (
+            !fullName ||
+            !email ||
+            typeof password !== 'string' ||
+            typeof securityQuestion !== 'string' ||
+            typeof securityAnswer !== 'string'
+        ) {
             return res.status(400).json({
                 success: false,
                 message: 'Please complete all required fields.'
@@ -214,13 +237,40 @@ app.post('/api/register', async (req, res) => {
             });
         }
 
+        if (!allowedSecurityQuestions.includes(securityQuestion)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select a valid security question.'
+            });
+        }
+
+        const normalizedAnswer = securityAnswer.trim().toLowerCase();
+
+        if (
+            normalizedAnswer.length < 2 ||
+            Buffer.byteLength(normalizedAnswer, 'utf8') > 72
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Your security answer must contain at least 2 characters and no more than 72 bytes.'
+            });
+        }
+
         const passwordHash = await bcrypt.hash(password, 12);
+        const securityAnswerHash = await bcrypt.hash(normalizedAnswer, 12);
 
         await query(
             `INSERT INTO public.users
-                (full_name, email, password_hash)
-             VALUES ($1, $2, $3)`,
-            [fullName, email, passwordHash]
+                (full_name, email, password_hash,
+                 security_question, security_answer_hash)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+                fullName,
+                email,
+                passwordHash,
+                securityQuestion,
+                securityAnswerHash
+            ]
         );
 
         return res.status(201).json({
@@ -246,142 +296,173 @@ app.post('/api/register', async (req, res) => {
 });
 
 // =====================================================
-// FORGOT PASSWORD
+// FORGOT PASSWORD - GET SECURITY QUESTION
 // =====================================================
 
-app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
-    try {
-        const email = String(req.body.email || '').trim().toLowerCase();
+app.post(
+    '/api/recovery-question',
+    recoveryQuestionLimiter,
+    async (req, res) => {
+        try {
+            const email = String(req.body.email || '')
+                .trim()
+                .toLowerCase();
 
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please enter a valid email address.'
-            });
-        }
+            if (
+                !email ||
+                email.length > 255 ||
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please enter a valid email address.'
+                });
+            }
 
-        const users = await query(
-            `SELECT user_id
-             FROM public.users
-             WHERE email = $1`,
-            [email]
-        );
+            const users = await query(
+                `SELECT security_question
+                 FROM public.users
+                 WHERE email = $1`,
+                [email]
+            );
 
-        if (users.length === 0) {
-            return res.json({
-                success: true,
-                message: 'If an account exists, password reset instructions will be provided.'
-            });
-        }
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-
-        const tokenHash = crypto
-            .createHash('sha256')
-            .update(resetToken)
-            .digest('hex');
-
-        await query(
-            `UPDATE public.users
-             SET reset_token_hash = $1,
-                 reset_token_expiry = NOW() + INTERVAL '15 minutes'
-             WHERE user_id = $2`,
-            [tokenHash, users[0].user_id]
-        );
-
-        if (!isProduction) {
-            const baseUrl = process.env.BASE_URL ||
-                `http://localhost:${PORT}`;
+            if (
+                users.length === 0 ||
+                !users[0].security_question
+            ) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'No recovery question is available for this account. Please contact support.'
+                });
+            }
 
             return res.json({
                 success: true,
-                message: 'Development reset link generated.',
-                resetLink: `${baseUrl}/reset-password.html?token=${resetToken}`
+                securityQuestion: users[0].security_question
+            });
+
+        } catch (error) {
+            console.error('Recovery question error:', error);
+
+            return res.status(500).json({
+                success: false,
+                message: 'Unable to retrieve the recovery question. Please try again.'
             });
         }
-
-        // Email delivery has not yet been configured.
-        return res.status(503).json({
-            success: false,
-            message: 'Password reset email delivery has not yet been configured.'
-        });
-
-    } catch (error) {
-        console.error('Forgot password error:', error);
-
-        return res.status(500).json({
-            success: false,
-            message: 'Unable to process your request. Please try again.'
-        });
     }
-});
+);
 
 // =====================================================
-// RESET PASSWORD
+// FORGOT PASSWORD - VERIFY ANSWER AND RESET PASSWORD
 // =====================================================
 
-app.post('/api/reset-password', resetPasswordLimiter, async (req, res) => {
-    try {
-        const token = String(req.body.token || '');
-        const password = req.body.password;
+app.post(
+    '/api/reset-password-security',
+    passwordRecoveryLimiter,
+    async (req, res) => {
+        try {
+            const email = String(req.body.email || '')
+                .trim()
+                .toLowerCase();
 
-        if (!/^[a-f0-9]{64}$/.test(token)) {
-            return res.status(400).json({
+            const securityAnswer = req.body.securityAnswer;
+            const newPassword = req.body.newPassword;
+
+            if (
+                !email ||
+                typeof securityAnswer !== 'string' ||
+                typeof newPassword !== 'string'
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please complete all required fields.'
+                });
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please enter a valid email address.'
+                });
+            }
+
+            if (
+                newPassword.length < 8 ||
+                Buffer.byteLength(newPassword, 'utf8') > 72
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Your new password must be at least 8 characters and no more than 72 bytes.'
+                });
+            }
+
+            const normalizedAnswer = securityAnswer.trim().toLowerCase();
+
+            if (
+                normalizedAnswer.length < 2 ||
+                Buffer.byteLength(normalizedAnswer, 'utf8') > 72
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Incorrect security answer.'
+                });
+            }
+
+            const users = await query(
+                `SELECT user_id, security_answer_hash
+                 FROM public.users
+                 WHERE email = $1`,
+                [email]
+            );
+
+            if (
+                users.length === 0 ||
+                !users[0].security_answer_hash
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'The email address or security answer is incorrect.'
+                });
+            }
+
+            const user = users[0];
+
+            const answerMatches = await bcrypt.compare(
+                normalizedAnswer,
+                user.security_answer_hash
+            );
+
+            if (!answerMatches) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'The email address or security answer is incorrect.'
+                });
+            }
+
+            const newPasswordHash = await bcrypt.hash(newPassword, 12);
+
+            await query(
+                `UPDATE public.users
+                 SET password_hash = $1
+                 WHERE user_id = $2`,
+                [newPasswordHash, user.user_id]
+            );
+
+            return res.json({
+                success: true,
+                message: 'Your password has been changed successfully. You can now log in.'
+            });
+
+        } catch (error) {
+            console.error('Security password reset error:', error);
+
+            return res.status(500).json({
                 success: false,
-                message: 'Invalid or expired reset link.'
+                message: 'Unable to reset your password. Please try again.'
             });
         }
-
-        if (
-            typeof password !== 'string' ||
-            password.length < 8 ||
-            Buffer.byteLength(password, 'utf8') > 72
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: 'Password must be at least 8 characters and no more than 72 bytes.'
-            });
-        }
-
-        const tokenHash = crypto
-            .createHash('sha256')
-            .update(token)
-            .digest('hex');
-
-        const passwordHash = await bcrypt.hash(password, 12);
-
-        const updatedUsers = await query(
-            `UPDATE public.users
-             SET password_hash = $1,
-                 reset_token_hash = NULL,
-                 reset_token_expiry = NULL
-             WHERE reset_token_hash = $2
-               AND reset_token_expiry > NOW()
-             RETURNING user_id`,
-            [passwordHash, tokenHash]
-        );
-
-        if (updatedUsers.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'This reset link is invalid or has expired. Please request another one.'
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: 'Your password has been changed successfully. You can now log in.'
-        });
-
-    } catch (error) {
-        console.error('Reset password error:', error);
-
-        return res.status(500).json({
-            success: false,
-            message: 'Unable to reset your password. Please try again.'
-        });
     }
-});
+);
 
 // =====================================================
 // USER LOGIN

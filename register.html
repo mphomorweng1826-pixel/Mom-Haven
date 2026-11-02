@@ -60,18 +60,28 @@
             font-size: 14px;
         }
 
-        input {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 1px solid #d7ccc8;
             border-radius: 6px;
             font-size: 15px;
+            background: white;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #8d6e63;
             box-shadow: 0 0 4px rgba(141, 110, 99, 0.3);
+        }
+
+        .security-note {
+            color: #777;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 7px;
         }
 
         button {
@@ -183,11 +193,58 @@
                 >
             </div>
 
+            <div class="form-group">
+                <label for="securityQuestion">Security Question</label>
+
+                <select
+                    id="securityQuestion"
+                    name="securityQuestion"
+                    required
+                >
+                    <option value="">Choose a security question</option>
+                    <option value="What was the name of your first school?">
+                        What was the name of your first school?
+                    </option>
+                    <option value="What is the name of your childhood best friend?">
+                        What is the name of your childhood best friend?
+                    </option>
+                    <option value="What was the name of your first pet?">
+                        What was the name of your first pet?
+                    </option>
+                    <option value="In what city were you born?">
+                        In what city were you born?
+                    </option>
+                    <option value="What is your favourite childhood memory?">
+                        What is your favourite childhood memory?
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="securityAnswer">Your Answer</label>
+
+                <input
+                    type="password"
+                    id="securityAnswer"
+                    name="securityAnswer"
+                    placeholder="Enter your security answer"
+                    maxlength="150"
+                    autocomplete="off"
+                    required
+                >
+
+                <p class="security-note">
+                    Remember your answer. You will need it if you
+                    forget your password. Avoid answers that other
+                    people can easily guess.
+                </p>
+            </div>
+
             <button type="submit" id="registerButton">
                 Create Account
             </button>
 
-            <p id="message" class="message" role="status"></p>
+            <p id="message" class="message" role="status" aria-live="polite"></p>
 
         </form>
 
@@ -210,6 +267,8 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const securityQuestion = document.getElementById('securityQuestion').value;
+            const securityAnswer = document.getElementById('securityAnswer').value.trim();
 
             message.textContent = '';
             message.style.color = '#c62828';
@@ -219,8 +278,18 @@
                 return;
             }
 
+            if (new TextEncoder().encode(password).length > 72) {
+                message.textContent = 'Your password is too long.';
+                return;
+            }
+
             if (password !== confirmPassword) {
                 message.textContent = 'The passwords do not match.';
+                return;
+            }
+
+            if (!securityQuestion || !securityAnswer) {
+                message.textContent = 'Please choose a security question and enter your answer.';
                 return;
             }
 
@@ -237,7 +306,9 @@
                     body: JSON.stringify({
                         fullName,
                         email,
-                        password
+                        password,
+                        securityQuestion,
+                        securityAnswer
                     })
                 });
 
@@ -250,11 +321,14 @@
                 message.style.color = '#2e7d32';
                 message.textContent = 'Account created successfully! Redirecting to login...';
 
+                registerForm.reset();
+
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 1500);
 
             } catch (error) {
+                message.style.color = '#c62828';
                 message.textContent = error.message;
             } finally {
                 registerButton.disabled = false;
