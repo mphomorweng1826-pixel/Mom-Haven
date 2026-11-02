@@ -27,8 +27,6 @@
     "express-rate-limit": "^8.7.2",
     "express-session": "^1.19.0",
     "helmet": "^8.3.0",
-    "msnodesqlv8": "^6.2.2",
-    "mssql": "^12.7.13",
     "pg": "^8.23.1"
   },
   "allowScripts": {
