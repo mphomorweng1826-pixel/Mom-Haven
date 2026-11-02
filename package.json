@@ -4,7 +4,8 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -20,13 +21,15 @@
   "homepage": "https://github.com/mphomorweng1826-pixel/Mom-Haven#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.2",
     "express-session": "^1.19.0",
     "helmet": "^8.3.0",
     "msnodesqlv8": "^6.2.2",
-    "mssql": "^12.7.13"
+    "mssql": "^12.7.13",
+    "pg": "^8.23.1"
   },
   "allowScripts": {
     "msnodesqlv8@6.2.2": true
