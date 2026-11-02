@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Mom's Haven</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* LOGIN PAGE */
+
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f4e3d7;
+        }
+
+        .login-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 20px;
+        }
+
+        .login-container {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(70, 45, 35, 0.10);
+        }
+
+        .login-container h1 {
+            color: #49352c;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .login-intro {
+            text-align: center;
+            color: #806d63;
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form-group label {
+            display: block;
+            color: #49352c;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ded3cc;
+            border-radius: 7px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #9b7464;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            color: #8b6254;
+            text-decoration: none;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 7px;
+            background: #50382e;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            background: #805c4e;
+        }
+
+        .login-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #error {
+            color: #a33b32;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        #success {
+            color: #39734a;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #806d63;
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #8b6254;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .login-footer {
+            background: white;
+            text-align: center;
+            padding: 18px;
+            color: #806d63;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 28px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body class="login-page">
+
+    <!-- HEADER -->
+
+    <header>
+        <nav>
+
+            <a href="index.html" class="logo">
+                <img src="icon_project.jpg" alt="Mom's Haven logo">
+                <span>Mom's Haven</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="emergency.html">Emergency Help</a>
+            </div>
+
+        </nav>
+    </header>
+
+    <!-- LOGIN SECTION -->
+
+    <main class="login-main">
+
+        <section class="login-container">
+
+            <h1>Welcome Back</h1>
+
+            <p class="login-intro">
+                Sign in to your Mom's Haven account
+                and continue your motherhood journey with us.
+            </p>
+
+            <form id="loginForm">
+
+                <div class="login-form-group">
+
+                    <label for="email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+                <div class="login-form-group">
+
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <a href="forgot-password.html" class="forgot-password">
+                        Forgot password?
+                    </a>
+
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    Login
+                </button>
+
+                <p id="error" role="alert" aria-live="polite"></p>
+
+                <p id="success" role="status" aria-live="polite"></p>
+
+            </form>
+
+            <p class="register-link">
+                Don't have an account?
+                <a href="register.html">Create an account</a>
+            </p>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+
+    <footer class="login-footer">
+        <p>© 2026 Mom's Haven. All rights reserved.</p>
+    </footer>
+
+    <!-- LOGIN JAVASCRIPT -->
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const loginButton = document.getElementById("loginButton");
+        const errorMessage = document.getElementById("error");
+        const successMessage = document.getElementById("success");
+
+        loginForm.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            errorMessage.textContent = "";
+            successMessage.textContent = "";
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            loginButton.disabled = true;
+            loginButton.textContent = "Signing in...";
+
+            try {
+
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Unable to log in. Please try again.");
+                }
+
+                successMessage.textContent = "Login successful! Redirecting...";
+
+                window.location.href = "home.html";
+
+            } catch (error) {
+
+                errorMessage.textContent =
+                    error.message || "Something went wrong. Please try again.";
+
+            } finally {
+
+                loginButton.disabled = false;
+                loginButton.textContent = "Login";
+
+            }
+
+        });
+    </script>
+
+</body>
+</html>
